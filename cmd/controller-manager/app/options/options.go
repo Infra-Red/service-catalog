@@ -126,4 +126,7 @@ func (s *ControllerManagerServer) AddFlags(fs *pflag.FlagSet) {
 	utilfeature.DefaultMutableFeatureGate.AddFlag(fs)
 	fs.StringVar(&s.ClusterIDConfigMapName, "cluster-id-configmap-name", controller.DefaultClusterIDConfigMapName, "k8s name for clusterid configmap")
 	fs.StringVar(&s.ClusterIDConfigMapNamespace, "cluster-id-configmap-namespace", controller.DefaultClusterIDConfigMapNamespace, "k8s namespace for clusterid configmap")
+	// https://kubernetes.io/docs/reference/command-line-tools-reference/kubelet/
+	fs.Int32Var(&s.KubeAPIBurst, "kube-api-burst", 100, "Burst to use while talking with kubernetes API server")
+	fs.Float32Var(&s.KubeAPIQPS, "kube-api-qps", 50, "QPS to use while talking with kubernetes API server")
 }

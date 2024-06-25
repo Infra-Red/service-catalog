@@ -121,7 +121,7 @@ ifdef NO_PODMAN
 	.initGoModVendorResult:=$(shell go mod vendor)
 else
 	# Mount .pkg as pkg so that we save our cached "go build" output files
-	PODMAN_CMD = podman run --security-opt label=disable --rm \
+	PODMAN_CMD = docker run --security-opt label=disable --rm \
 	  -v $(CURDIR):/go/src/$(SC_PKG):delegated \
 	  -v $(CURDIR)/.cache:/root/.cache/:cached \
 	  -v $(CURDIR)/.pkg:/go/pkg:cached $(SC_BUILD_IMAGE)
@@ -134,7 +134,7 @@ endif
 #########################################################################
 
 bootstrap:
-	podman run --security-opt label=disable --rm \
+	docker run --security-opt label=disable --rm \
 	  -w /go/src/$(SC_PKG) \
 	  -v $(CURDIR):/go/src/$(SC_PKG):delegated \
 	  ${DEV_REGISTRY}/drycc/go-dev \
@@ -207,10 +207,10 @@ $(BINDIR)/%-gen: $$(shell find vendor/k8s.io/code-generator/cmd/$$*-gen vendor/k
 $(BINDIR):
 	mkdir -p $@
 
-.scBuildImage: build/build-image/Dockerfile $$(shell sh -c "podman inspect $SC_BUILD_IMAGE" > /dev/null 2>&1 || echo .forceIt)
+.scBuildImage: build/build-image/Dockerfile $$(shell sh -c "docker inspect $SC_BUILD_IMAGE" > /dev/null 2>&1 || echo .forceIt)
 	mkdir -p .cache
 	mkdir -p .pkg
-	podman build -t $(SC_BUILD_IMAGE) --build-arg GO_VERSION=$(GO_VERSION) -f build/build-image/Dockerfile .
+	docker build -t $(SC_BUILD_IMAGE) --build-arg GO_VERSION=$(GO_VERSION) -f build/build-image/Dockerfile .
 	touch $@
 
 # Just a dummy target that will force anything dependent on it to rebuild
@@ -311,7 +311,7 @@ clean-bin: .init $(scBuildImageTarget)
 clean-build-image: .init $(scBuildImageTarget)
 	$(PODMAN_CMD) rm -rf .pkg
 	rm -f .scBuildImage
-	podman rmi -f $(SC_BUILD_IMAGE) > /dev/null 2>&1 || true
+	docker rmi -f $(SC_BUILD_IMAGE) > /dev/null 2>&1 || true
 
 # clean-generated does a `git checkout --` on all generated files and
 # directories.  May not work correctly if you have staged some of these files
@@ -360,37 +360,37 @@ define build-and-tag # (service, image, mutable_image, prefix)
 	# -i.bak is required for cross-platform compat: https://stackoverflow.com/questions/5694228/sed-in-place-flag-that-works-both-on-mac-bsd-and-linux
 	sed -i.bak "s|BASEIMAGE|$(BASEIMAGE)|g" $(tmp_build_path)/Dockerfile
 	rm $(tmp_build_path)/Dockerfile.bak
-	podman build -t $(2) $(tmp_build_path)
-	podman tag $(2) $(3)
+	docker build -t $(2) $(tmp_build_path)
+	docker tag $(2) $(3)
 	rm -rf $(tmp_build_path)
 endef
 
 user-broker-image: contrib/build/user-broker/Dockerfile $(BINDIR)/user-broker
 	$(call build-and-tag,"user-broker",$(USER_BROKER_IMAGE),$(USER_BROKER_MUTABLE_IMAGE),"contrib/")
 ifeq ($(ARCH),amd64)
-	podman tag $(USER_BROKER_IMAGE) $(REGISTRY)user-broker:$(VERSION)
-	podman tag $(USER_BROKER_MUTABLE_IMAGE) $(REGISTRY)user-broker:$(MUTABLE_TAG)
+	docker tag $(USER_BROKER_IMAGE) $(REGISTRY)user-broker:$(VERSION)
+	docker tag $(USER_BROKER_MUTABLE_IMAGE) $(REGISTRY)user-broker:$(MUTABLE_TAG)
 endif
 
 test-broker-image: contrib/build/test-broker/Dockerfile $(BINDIR)/test-broker
 	$(call build-and-tag,"test-broker",$(TEST_BROKER_IMAGE),$(TEST_BROKER_MUTABLE_IMAGE),"contrib/")
 ifeq ($(ARCH),amd64)
-	podman tag $(TEST_BROKER_IMAGE) $(REGISTRY)test-broker:$(VERSION)
-	podman tag $(TEST_BROKER_MUTABLE_IMAGE) $(REGISTRY)test-broker:$(MUTABLE_TAG)
+	docker tag $(TEST_BROKER_IMAGE) $(REGISTRY)test-broker:$(VERSION)
+	docker tag $(TEST_BROKER_MUTABLE_IMAGE) $(REGISTRY)test-broker:$(MUTABLE_TAG)
 endif
 
 service-catalog-image: build/service-catalog/Dockerfile $(BINDIR)/service-catalog
 	$(call build-and-tag,"service-catalog",$(SERVICE_CATALOG_IMAGE),$(SERVICE_CATALOG_MUTABLE_IMAGE))
 ifeq ($(ARCH),amd64)
-	podman tag $(SERVICE_CATALOG_IMAGE) $(REGISTRY)service-catalog:$(VERSION)
-	podman tag $(SERVICE_CATALOG_MUTABLE_IMAGE) $(REGISTRY)service-catalog:$(MUTABLE_TAG)
+	docker tag $(SERVICE_CATALOG_IMAGE) $(REGISTRY)service-catalog:$(VERSION)
+	docker tag $(SERVICE_CATALOG_MUTABLE_IMAGE) $(REGISTRY)service-catalog:$(MUTABLE_TAG)
 endif
 
 healthcheck-image: contrib/build/healthcheck/Dockerfile $(BINDIR)/healthcheck
 	$(call build-and-tag,"healthcheck",$(HEALTHCHECK_IMAGE),$(HEALTHCHECK_MUTABLE_IMAGE),"contrib/")
 ifeq ($(ARCH),amd64)
-	podman tag $(HEALTHCHECK_IMAGE) $(REGISTRY)healthcheck:$(VERSION)
-	podman tag $(HEALTHCHECK_MUTABLE_IMAGE) $(REGISTRY)healthcheck:$(MUTABLE_TAG)
+	docker tag $(HEALTHCHECK_IMAGE) $(REGISTRY)healthcheck:$(VERSION)
+	docker tag $(HEALTHCHECK_MUTABLE_IMAGE) $(REGISTRY)healthcheck:$(MUTABLE_TAG)
 endif
 
 # Push our Container Images to a registry
@@ -398,25 +398,25 @@ endif
 push: user-broker-push test-broker-push service-catalog-push
 
 user-broker-push: user-broker-image
-	podman push $(USER_BROKER_IMAGE)
-	podman push $(USER_BROKER_MUTABLE_IMAGE)
+	docker push $(USER_BROKER_IMAGE)
+	docker push $(USER_BROKER_MUTABLE_IMAGE)
 ifeq ($(ARCH),amd64)
-	podman push $(REGISTRY)user-broker:$(VERSION)
-	podman push $(REGISTRY)user-broker:$(MUTABLE_TAG)
+	docker push $(REGISTRY)user-broker:$(VERSION)
+	docker push $(REGISTRY)user-broker:$(MUTABLE_TAG)
 endif
 
 test-broker-push: test-broker-image
-	podman push $(TEST_BROKER_IMAGE)
-	podman push $(TEST_BROKER_MUTABLE_IMAGE)
+	docker push $(TEST_BROKER_IMAGE)
+	docker push $(TEST_BROKER_MUTABLE_IMAGE)
 ifeq ($(ARCH),amd64)
-	podman push $(REGISTRY)test-broker:$(VERSION)
-	podman push $(REGISTRY)test-broker:$(MUTABLE_TAG)
+	docker push $(REGISTRY)test-broker:$(VERSION)
+	docker push $(REGISTRY)test-broker:$(MUTABLE_TAG)
 endif
 
 service-catalog-push: service-catalog-image
-	podman push $(SERVICE_CATALOG_IMAGE)
+	docker push $(SERVICE_CATALOG_IMAGE)
 ifeq ($(ARCH),amd64)
-	podman push $(REGISTRY)service-catalog:$(VERSION)
+	docker push $(REGISTRY)service-catalog:$(VERSION)
 endif
 
 

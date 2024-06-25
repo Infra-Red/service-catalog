@@ -114,7 +114,9 @@ func Run(controllerManagerOptions *options.ControllerManagerServer) error {
 	k8sKubeconfig.ContentConfig.ContentType = controllerManagerOptions.ContentType
 	// Override kubeconfig qps/burst settings from flags
 	k8sKubeconfig.QPS = controllerManagerOptions.KubeAPIQPS
+	klog.V(4).Infof("Configuring service-catalog with QPS of: %v\n", controllerManagerOptions.KubeAPIQPS)
 	k8sKubeconfig.Burst = int(controllerManagerOptions.KubeAPIBurst)
+	klog.V(4).Infof("Configuring service-catalog with burst of: %v\n", controllerManagerOptions.KubeAPIBurst)
 	k8sKubeClient, err := kubernetes.NewForConfig(
 		rest.AddUserAgent(k8sKubeconfig, controllerManagerAgentName),
 	)
