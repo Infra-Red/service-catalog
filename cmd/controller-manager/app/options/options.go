@@ -61,6 +61,7 @@ const (
 	defaultReconciliationRetryDuration            = 7 * 24 * time.Hour
 	defaultOperationPollingMaximumBackoffDuration = 20 * time.Minute
 	defaultOSBAPITimeOut                          = 60 * time.Second
+	defaultServiceInstanceParametersFetchInterval = 60 * time.Second
 )
 
 var defaultOSBAPIPreferredVersion = osb.LatestAPIVersion().HeaderValue()
@@ -88,6 +89,7 @@ func NewControllerManagerServer() *ControllerManagerServer {
 			ReconciliationRetryDuration:            defaultReconciliationRetryDuration,
 			OperationPollingMaximumBackoffDuration: defaultOperationPollingMaximumBackoffDuration,
 			SecureServingOptions:                   genericoptions.NewSecureServingOptions(),
+			ServiceInstanceParametersFetchInterval: defaultServiceInstanceParametersFetchInterval,
 		},
 	}
 	// set defaults, these will be overridden by user specified flags
@@ -112,6 +114,7 @@ func (s *ControllerManagerServer) AddFlags(fs *pflag.FlagSet) {
 	fs.BoolVar(&s.ServiceCatalogInsecureSkipVerify, "service-catalog-insecure-skip-verify", s.ServiceCatalogInsecureSkipVerify, "Skip verification of the TLS certificate for the service-catalog API server")
 	fs.DurationVar(&s.ResyncInterval, "resync-interval", s.ResyncInterval, "The interval on which the controller will resync its informers")
 	fs.DurationVar(&s.ServiceBrokerRelistInterval, "broker-relist-interval", s.ServiceBrokerRelistInterval, "The interval on which a broker's catalog is relisted after the broker becomes ready")
+	fs.DurationVar(&s.ServiceInstanceParametersFetchInterval, "parameters-fetch-interval", s.ServiceInstanceParametersFetchInterval, "The interval on which a service instances's parameters are re-fetched")
 	fs.BoolVar(&s.OSBAPIContextProfile, "enable-osb-api-context-profile", s.OSBAPIContextProfile, "This does nothing.")
 	fs.MarkHidden("enable-osb-api-context-profile")
 	fs.StringVar(&s.OSBAPIPreferredVersion, "osb-api-preferred-version", s.OSBAPIPreferredVersion, "The string to send as the version header.")

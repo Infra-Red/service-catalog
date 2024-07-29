@@ -3386,6 +3386,21 @@ func schema_pkg_apis_servicecatalog_v1beta1_ServiceInstanceStatus(ref common.Ref
 							Ref:         ref("k8s.io/apimachinery/pkg/runtime.RawExtension"),
 						},
 					},
+					"parameters": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Parameters are used to discover out-of-bands changes that were applied on a Service Instance. https://github.com/openservicebrokerapi/servicebroker/blob/v2.17/spec.md#fetching-a-service-instance",
+							Type:        []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Allows: true,
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type:   []string{"object"},
+										Format: "",
+									},
+								},
+							},
+						},
+					},
 					"lastConditionState": {
 						SchemaProps: spec.SchemaProps{
 							Description: "LastConditionState aggregates state from the Conditions array It is used for printing in a kubectl output via additionalPrinterColumns",

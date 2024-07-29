@@ -2204,6 +2204,11 @@ func clearServiceInstanceCurrentOperation(toUpdate *v1beta1.ServiceInstance) {
 	toUpdate.Status.CurrentOperation = ""
 	toUpdate.Status.OperationStartTime = nil
 	toUpdate.Status.AsyncOpInProgress = false
+	toUpdate.Status.Parameters = v1beta1.ServiceInstanceParameters{ // TODO: fetch actual service instance parameters
+		"foo":   "bar",
+		"zombo": true,
+		"param": 123,
+	}
 	toUpdate.Status.LastOperation = nil
 	toUpdate.Status.InProgressProperties = nil
 }

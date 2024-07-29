@@ -25,6 +25,7 @@ import (
 	"os"
 	goruntime "runtime"
 	"strconv"
+	"time"
 
 	"github.com/drycc-addons/service-catalog/pkg/util"
 	"k8s.io/client-go/kubernetes"
@@ -266,6 +267,14 @@ func Run(controllerManagerOptions *options.ControllerManagerServer) error {
 	if err != nil {
 		return err
 	}
+
+	go func() {
+		t := time.NewTicker(controllerManagerOptions.ServiceInstanceParametersFetchInterval)
+		klog.V(5).Infof("Starting service instance parameters re-fetcher; refetch interval: %v", controllerManagerOptions.ServiceInstanceParametersFetchInterval)
+		for range t.C {
+			time.Sleep(1 * time.Second)
+		}
+	}()
 
 	// Try and become the leader and start cloud controller manager loops
 	leaderelection.RunOrDie(context.TODO(), leaderelection.LeaderElectionConfig{

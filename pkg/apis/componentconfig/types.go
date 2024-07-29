@@ -72,6 +72,10 @@ type ControllerManagerConfiguration struct {
 	// listed.
 	ServiceBrokerRelistInterval time.Duration
 
+	// ServiceInstanceParametersFetchInterval is the interval on which Service Instance's
+	// parameters are re-fetched.
+	ServiceInstanceParametersFetchInterval time.Duration
+
 	// Whether or not to send the proposed optional
 	// OpenServiceBroker API Context Profile field
 	OSBAPIContextProfile   bool

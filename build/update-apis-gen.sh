@@ -27,11 +27,11 @@ SC_PKG='github.com/drycc-addons/service-catalog'
 
 # Generate deep copies
 ${BINDIR}/deepcopy-gen "$@" \
-	 --v 1 --logtostderr \
-	 --go-header-file "contrib/hack/boilerplate.go.txt" \
-	 --input-dirs "${SC_PKG}/pkg/apis/servicecatalog/v1beta1" \
-	 --bounding-dirs "github.com/drycc-addons/service-catalog" \
-	 --output-file-base zz_generated.deepcopy
+	--v 1 --logtostderr \
+	--go-header-file "contrib/hack/boilerplate.go.txt" \
+	--input-dirs "${SC_PKG}/pkg/apis/servicecatalog/v1beta1" \
+	--bounding-dirs "github.com/drycc-addons/service-catalog" \
+	--output-file-base zz_generated.deepcopy
 
 #
 # Generate auto-generated code (defaults, deepcopy and conversion) for Settings group
@@ -69,9 +69,9 @@ KNOWN_VIOLATION_FILENAME=./contrib/build/violation_exceptions.txt
 API_RULE_CHECK_FAILURE_MESSAGE="Error: API rules check failed. Reported violations \"${REPORT_FILENAME}\" differ from known violations \"${KNOWN_VIOLATION_FILENAME}\". Please fix API source file if new violation is detected, or update known violations \"${KNOWN_VIOLATION_FILENAME}\" if existing violation is being fixed. Please refer to k8s.io/kubernetes/api/api-rules/README.md and https://github.com/kubernetes/kube-openapi/tree/master/pkg/generators/rules for more information about the API rules being enforced."
 
 for var in "$@"; do
-  if [ "$var" = "--verify-only" ]; then
-    REPORT_FILENAME="${KNOWN_VIOLATION_FILENAME}"
-  fi;
+	if [ "$var" = "--verify-only" ]; then
+		REPORT_FILENAME="${KNOWN_VIOLATION_FILENAME}"
+	fi
 done
 
 ${BINDIR}/openapi-gen \
@@ -89,4 +89,7 @@ ${BINDIR}/openapi-gen \
 	"${SC_PKG}/pkg/apis/servicecatalog/v1beta1" \
 	"${SC_PKG}/pkg/apis/settings/v1alpha1" || true
 
-diff -u "${REPORT_FILENAME}" "${KNOWN_VIOLATION_FILENAME}" || (echo ${API_RULE_CHECK_FAILURE_MESSAGE}; exit 1)
+diff -u "${REPORT_FILENAME}" "${KNOWN_VIOLATION_FILENAME}" || (
+	echo ${API_RULE_CHECK_FAILURE_MESSAGE}
+	exit 1
+)

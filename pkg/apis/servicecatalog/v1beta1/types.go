@@ -987,6 +987,12 @@ type ServiceInstanceStatus struct {
 	// instance.
 	DefaultProvisionParameters *runtime.RawExtension `json:"defaultProvisionParameters,omitempty"`
 
+	// Parameters are used to discover out-of-bands changes that were applied
+	// on a Service Instance.
+	// https://github.com/openservicebrokerapi/servicebroker/blob/v2.17/spec.md#fetching-a-service-instance
+	// +optional
+	Parameters ServiceInstanceParameters `json:"parameters"`
+
 	// LastConditionState aggregates state from the Conditions array
 	// It is used for printing in a kubectl output via additionalPrinterColumns
 	LastConditionState string `json:"lastConditionState"`
@@ -998,6 +1004,15 @@ type ServiceInstanceStatus struct {
 	// UserSpecifiedClassName aggregates cluster or namespace ClassName
 	// It is used for printing in a kubectl output via additionalPrinterColumns
 	UserSpecifiedClassName string `json:"userSpecifiedClassName"`
+}
+
+// ServiceInstanceParameters is a carrier for an untyped JSON payload.
+type ServiceInstanceParameters map[string]interface{}
+
+// DeepCopy deep copies the passed value, assuming it is a valid
+// JSON representation.
+func (in ServiceInstanceParameters) DeepCopy() ServiceInstanceParameters {
+	return runtime.DeepCopyJSON(in)
 }
 
 // ServiceInstanceCondition contains condition information about an Instance.
